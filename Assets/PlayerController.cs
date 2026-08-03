@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
@@ -12,6 +13,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
     private bool isGrounded;
+    [Header("Dash Settings")]
+    [SerializeField] private float dashForce = 10f;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float dashCooldown = 1f;
+    private bool isDashing;
+    private bool canDash = true;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -20,6 +27,10 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isDashing)
+        {
+            return;
+        }
         isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
         horizontalInput = 0f;
         if (Keyboard.current != null)
@@ -37,14 +48,37 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
         }
+        if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame && canDash)
+        {
+            StartCoroutine(Dash());
+        }
     }
     void FixedUpdate()
     {
+        if (isDashing)
+        {
+            return;
+        }
         rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
     }
     private void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+    }
+    private IEnumerator Dash()
+    {
+        isDashing = true;
+        canDash = false;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+        float dashDirection = horizontalInput != 0 ? horizontalInput : transform.localScale.x;
+        rb.linearVelocity = new Vector2(dashDirection * dashForce, 0f);
+        yield return new WaitForSeconds(dashDuration);
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+        yield return new WaitForSeconds(dashCooldown);
+        canDash = true;
+        
     }
     private void OnDrawGizmosSelected()
     {
