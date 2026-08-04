@@ -36,6 +36,10 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 10f);
+        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            ResetToNormal();
+        }
         if (isDashing)
         {
             return;
@@ -75,26 +79,21 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
     }
     //Morph Logic
-    public void TriggerSmoosh(bool squishedVertically)
+   public void MakeFlat()
     {
-        switch (currentState)
-        {
-            case BodyState.Normal:
-              if (squishedVertically) SetState(BodyState.Flat);
-              else SetState(BodyState.Tall);
-              break;
-            case BodyState.Tall:
-                SetState(BodyState.Flat);
-                break;
-            case BodyState.Flat:
-                SetState(BodyState.Tall);
-                break;
-        }
+        SetState(BodyState.Flat);
     }
-    public void ResettoNormal()
+
+    public void MakeTall()
+    {
+        SetState(BodyState.Tall);
+    }
+
+    public void ResetToNormal()
     {
         SetState(BodyState.Normal);
     }
+
     private void SetState(BodyState newState)
     {
         currentState = newState;
