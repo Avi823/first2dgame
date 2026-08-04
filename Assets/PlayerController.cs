@@ -19,14 +19,23 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashCooldown = 1f;
     private bool isDashing;
     private bool canDash = true;
+    public enum BodyState{ Normal, Tall, Flat }
+    [Header("Morph Systems")]
+    [SerializeField] private BodyState currentState = BodyState.Normal;
+    private Vector3 normalScale = new Vector3(1f, 1f, 1f);
+    private Vector3 tallScale = new Vector3(0.6f, 1.5f, 1f);
+    private Vector3 flatScale = new Vector3(1.5f, 0.6f, 1f);
+    private Vector3 targetScale;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        targetScale = normalScale;
     }
 
     // Update is called once per frame
     void Update()
     {
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 10f);
         if (isDashing)
         {
             return;
@@ -64,6 +73,37 @@ public class PlayerController : MonoBehaviour
     private void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+    }
+    //Morph Logic
+    public void TriggerSmoosh(bool squishedVertically)
+    {
+        switch (currentState)
+        {
+            case BodyState.Normal:
+              if (squishedVertically) SetState(BodyState.Flat);
+              else SetState(BodyState.Tall);
+              break;
+            case BodyState.Tall:
+                SetState(BodyState.Flat);
+                break;
+            case BodyState.Flat:
+                SetState(BodyState.Tall);
+                break;
+        }
+    }
+    public void ResettoNormal()
+    {
+        SetState(BodyState.Normal);
+    }
+    private void SetState(BodyState newState)
+    {
+        currentState = newState;
+        switch (currentState)
+        {
+            case BodyState.Normal: targetScale = normalScale; break;
+            case BodyState.Tall: targetScale = tallScale; break;
+            case BodyState.Flat: targetScale = flatScale; break;
+        }
     }
     private IEnumerator Dash()
     {

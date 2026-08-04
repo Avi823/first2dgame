@@ -9,6 +9,8 @@ public class Portal : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log("SOMETHING TOUCHED THE PORTAL: " + other.gameObject.name);
+
         if (isTransitioning)
         {
             return;
