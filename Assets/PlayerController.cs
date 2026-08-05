@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheckPoint;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+    private Collider2D playerCollider;
     private bool isGrounded;
     [Header("Dash Settings")]
     [SerializeField] private float dashForce = 10f;
@@ -29,6 +30,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerCollider = GetComponent<Collider2D>();
         targetScale = normalScale;
     }
 
@@ -44,7 +46,8 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
+        Vector2 bottomCenter = new Vector2(playerCollider.bounds.center.x, playerCollider.bounds.min.y);
+        isGrounded = Physics2D.OverlapCircle(bottomCenter, groundCheckRadius, groundLayer);
         horizontalInput = 0f;
         if (Keyboard.current != null)
         {
