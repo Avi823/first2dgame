@@ -753,7 +753,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -42.45, y: 1.43, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 0}
+  m_LocalScale: {x: 1.134129, y: 1.134129, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1965464454}
@@ -820,7 +820,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.020620346, y: 0.030931056}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -830,7 +830,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.7937889, y: 0.73193157}
   m_EdgeRadius: 0
 --- !u!212 &537417079
 SpriteRenderer:
@@ -915,6 +915,12 @@ MonoBehaviour:
   dashDuration: 0.2
   dashCooldown: 1
   currentState: 0
+  spriteRenderer: {fileID: 537417079}
+  normalSprite: {fileID: -6888756438569675735, guid: f54b3d78df93c794790586b1cd330c36, type: 3}
+  tallSprite: {fileID: 3763752930381237044, guid: b8dc2e725d84f954f837e128c291cd38, type: 3}
+  flatSprite: {fileID: -8527442550737655860, guid: d761dad289261d341983aef826c84f3f, type: 3}
+  rb: {fileID: 0}
+  rollTorque: 7
 --- !u!1 &552960520
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,7 +1800,7 @@ Transform:
   m_GameObject: {fileID: 1525999672}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -35.67, y: -1.96, z: 0}
+  m_LocalPosition: {x: -35.6, y: -1.25, z: 0}
   m_LocalScale: {x: -28.54561, y: 1.0566, z: 1.0566}
   m_ConstrainProportionsScale: 0
   m_Children: []
