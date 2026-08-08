@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
     [Header("Physics Settings")]
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float rollTorque = 15f;
+    [SerializeField] private float maxAngularVelocity = 500f;
 
     void Start()
     {
@@ -100,9 +101,17 @@ public class PlayerController : MonoBehaviour
 
         rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
 
-        if (currentState == BodyState.Normal && horizontalInput != 0)
+        if (currentState == BodyState.Normal)
         {
-            rb.AddTorque(-horizontalInput * rollTorque);
+            if (horizontalInput != 0)
+            {
+                rb.AddTorque(-horizontalInput * rollTorque);
+                rb.angularVelocity = Mathf.Clamp(rb.angularVelocity, -maxAngularVelocity, maxAngularVelocity);
+            }
+            else
+            {
+                rb.angularVelocity = Mathf.Lerp(rb.angularVelocity, 0f, Time.fixedDeltaTime * 10f);
+            }
         }
     }
 
