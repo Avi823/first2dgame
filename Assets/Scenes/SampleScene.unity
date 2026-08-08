@@ -920,7 +920,8 @@ MonoBehaviour:
   tallSprite: {fileID: 3763752930381237044, guid: b8dc2e725d84f954f837e128c291cd38, type: 3}
   flatSprite: {fileID: -8527442550737655860, guid: d761dad289261d341983aef826c84f3f, type: 3}
   rb: {fileID: 0}
-  rollTorque: 7
+  rollTorque: 4
+  maxAngularVelocity: 500
 --- !u!1 &552960520
 GameObject:
   m_ObjectHideFlags: 0
