@@ -48,6 +48,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<Collider2D>();
         targetScale = normalScale;
+        ResetToNormal();
     }
 
     void Update()
