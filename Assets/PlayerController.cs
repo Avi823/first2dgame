@@ -10,11 +10,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 5f;
 
     [Header("Ground Check")]
-    [SerializeField] private Transform groundCheckPoint;
-    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private float groundCheckRadius = 0.3f;
     [SerializeField] private LayerMask groundLayer;
     private Collider2D playerCollider;
     private bool isGrounded;
+
+    [Header("Jump Buffering")]
+    [SerializeField] private float jumpBufferTime = 0.15f;
+    private float jumpBufferCounter;
 
     [Header("Dash Settings")]
     [SerializeField] private float dashForce = 10f;
@@ -23,7 +26,7 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private bool canDash = true;
 
-    public enum BodyState{ Normal, Tall, Flat }
+    public enum BodyState { Normal, Tall, Flat }
 
     [Header("Morph Systems")]
     [SerializeField] private BodyState currentState = BodyState.Normal;
@@ -43,6 +46,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float rollTorque = 15f;
     [SerializeField] private float maxAngularVelocity = 500f;
 
+    private readonly Collider2D[] groundOverlapResults = new Collider2D[1];
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -60,13 +65,26 @@ public class PlayerController : MonoBehaviour
             ResetToNormal();
         }
 
+        if (Keyboard.current != null && Keyboard.current.tKey.wasPressedThisFrame)
+        {
+            if (Checkpoints.instance != null)
+            {
+                Checkpoints.instance.RespawnPlayer();
+            }
+        }
+
         if (isDashing)
         {
             return;
         }
 
-        Vector2 bottomCenter = new Vector2(playerCollider.bounds.center.x, playerCollider.bounds.min.y);
-        isGrounded = Physics2D.OverlapCircle(bottomCenter, groundCheckRadius, groundLayer);
+        Vector2 checkPosition = new Vector2(playerCollider.bounds.center.x, playerCollider.bounds.min.y);
+
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.SetLayerMask(groundLayer);
+        filter.useTriggers = false;
+
+        isGrounded = Physics2D.OverlapCircle(checkPosition, groundCheckRadius, filter, groundOverlapResults) > 0;
 
         horizontalInput = 0f;
 
@@ -80,11 +98,21 @@ public class PlayerController : MonoBehaviour
             {
                 horizontalInput = 1f;
             }
+
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                jumpBufferCounter = jumpBufferTime;
+            }
+            else
+            {
+                jumpBufferCounter -= Time.deltaTime;
+            }
         }
 
-        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
+        if (jumpBufferCounter > 0f && isGrounded)
         {
             Jump();
+            jumpBufferCounter = 0f;
         }
 
         if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame && canDash)
@@ -142,21 +170,21 @@ public class PlayerController : MonoBehaviour
 
         switch (currentState)
         {
-            case BodyState.Normal: 
-                targetScale = normalScale; 
-                if (normalSprite != null) spriteRenderer.sprite = normalSprite;
+            case BodyState.Normal:
+                targetScale = normalScale;
+                if (normalSprite != null && spriteRenderer != null) spriteRenderer.sprite = normalSprite;
                 rb.constraints = RigidbodyConstraints2D.None;
                 break;
 
-            case BodyState.Tall: 
-                targetScale = tallScale; 
-                if (tallSprite != null) spriteRenderer.sprite = tallSprite;
+            case BodyState.Tall:
+                targetScale = tallScale;
+                if (tallSprite != null && spriteRenderer != null) spriteRenderer.sprite = tallSprite;
                 ResetRotationAndLock();
                 break;
 
-            case BodyState.Flat: 
-                targetScale = flatScale; 
-                if (flatSprite != null) spriteRenderer.sprite = flatSprite;
+            case BodyState.Flat:
+                targetScale = flatScale;
+                if (flatSprite != null && spriteRenderer != null) spriteRenderer.sprite = flatSprite;
                 ResetRotationAndLock();
                 break;
         }
@@ -176,7 +204,7 @@ public class PlayerController : MonoBehaviour
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0f;
 
-        float dashDirection = horizontalInput != 0 ? horizontalInput : transform.localScale.x;
+        float dashDirection = horizontalInput != 0 ? horizontalInput : Mathf.Sign(transform.localScale.x);
         rb.linearVelocity = new Vector2(dashDirection * dashForce, 0f);
 
         yield return new WaitForSeconds(dashDuration);
@@ -191,10 +219,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (groundCheckPoint != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
-        }
+        Collider2D col = playerCollider != null ? playerCollider : GetComponent<Collider2D>();
+        if (col == null) return;
+
+        Vector2 checkPosition = new Vector2(col.bounds.center.x, col.bounds.min.y);
+
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(checkPosition, groundCheckRadius);
     }
 }

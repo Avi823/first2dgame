@@ -1,12 +1,15 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // Added Input System namespace
 
-public class GamePauseManual : MonoBehaviour
+public class GamePauseManager : MonoBehaviour
 {
-    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private GameObject pauseMenuUI;
     private bool isPaused = false;
+
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        // Toggle pause state using the New Input System
+        if (Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
         {
             if (isPaused)
             {
@@ -18,22 +21,24 @@ public class GamePauseManual : MonoBehaviour
             }
         }
     }
+
     public void PauseGame()
     {
-        if (pauseMenu != null)
-        {
-            pauseMenu.SetActive(true);
-        }
-        Time.timeScale = 0f;
         isPaused = true;
+        Time.timeScale = 0f;
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(true);
+        }
     }
+
     public void ResumeGame()
     {
-        if (pauseMenu != null)
-        {
-            pauseMenu.SetActive(false);
-        }
-        Time.timeScale = 1f;
         isPaused = false;
+        Time.timeScale = 1f;
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(false);
+        }
     }
 }
