@@ -13,24 +13,28 @@ public class PlinkoController : MonoBehaviour
     [SerializeField] private CinemachineCamera cinemachineCamera;
     [SerializeField] private PlayerController playerMovementScript;
 
-    [Header("Ball Placement (tune these in the Inspector to match your board)")]
-    [Tooltip("World Y position of the drop rail - where the ball sits before you click to drop it.")]
+    [Header("Ball Placement")]
     [SerializeField] private float dropHeightY = 33.3f;
-    [Tooltip("Leftmost world X the ball can be placed at.")]
     [SerializeField] private float minDropX = 305f;
-    [Tooltip("Rightmost world X the ball can be placed at.")]
     [SerializeField] private float maxDropX = 322f;
 
     private Rigidbody2D ballRb;
+    private Vector3 ballInitialPosition;
 
     private void Start()
     {
         if (ballTransform != null)
         {
             ballTransform.TryGetComponent(out ballRb);
+            ballInitialPosition = ballTransform.position;
+
+            if (ballRb != null)
+            {
+                ballRb.bodyType = RigidbodyType2D.Kinematic;
+                ballRb.linearVelocity = Vector2.zero;
+            }
         }
 
-        // Make sure Cinemachine starts out following the player
         if (cinemachineCamera != null && playerTransform != null)
         {
             cinemachineCamera.Follow = playerTransform;
@@ -52,8 +56,6 @@ public class PlinkoController : MonoBehaviour
             return;
         }
 
-        // Convert the mouse's screen position to world space at the drop rail's depth,
-        // then slide the (still-kinematic) ball along X to follow it.
         Vector3 screenPos = Mouse.current.position.ReadValue();
         screenPos.z = Mathf.Abs(Camera.main.transform.position.z - dropHeightY);
         Vector3 worldPoint = Camera.main.ScreenToWorldPoint(screenPos);
@@ -81,20 +83,16 @@ public class PlinkoController : MonoBehaviour
     {
         state = PlinkoState.Aiming;
 
-        // Retarget Cinemachine to follow the ball instead of the player.
-        // Cinemachine's own damping handles the smooth pan - no manual transform code needed.
         if (cinemachineCamera != null && ballTransform != null)
         {
             cinemachineCamera.Follow = ballTransform;
         }
 
-        // Disable player movement controls during the Plinko phase
         if (playerMovementScript != null)
         {
             playerMovementScript.enabled = false;
         }
 
-        // Keep the ball frozen (kinematic) so it can be positioned before the drop
         if (ballRb != null)
         {
             ballRb.bodyType = RigidbodyType2D.Kinematic;
@@ -103,21 +101,47 @@ public class PlinkoController : MonoBehaviour
         }
     }
 
+    public void ResetPlinko()
+    {
+        state = PlinkoState.Inactive;
+
+        if (cinemachineCamera != null && playerTransform != null)
+        {
+            cinemachineCamera.Follow = playerTransform;
+        }
+
+        if (playerMovementScript != null)
+        {
+            playerMovementScript.enabled = true;
+        }
+
+        if (ballRb != null)
+        {
+            ballRb.bodyType = RigidbodyType2D.Kinematic;
+            ballRb.linearVelocity = Vector2.zero;
+            ballRb.angularVelocity = 0f;
+        }
+
+        if (ballTransform != null)
+        {
+            ballTransform.position = ballInitialPosition;
+        }
+    }
+
     public void EndPlinkoAndTeleport(Vector3 destination)
     {
         state = PlinkoState.Inactive;
 
-        // Teleport player to destination
         if (playerTransform != null)
         {
             playerTransform.position = destination;
         }
 
-        // Switch Cinemachine and controls back to the player
         if (cinemachineCamera != null && playerTransform != null)
         {
             cinemachineCamera.Follow = playerTransform;
         }
+
         if (playerMovementScript != null)
         {
             playerMovementScript.enabled = true;

@@ -65,14 +65,6 @@ public class PlayerController : MonoBehaviour
             ResetToNormal();
         }
 
-        if (Keyboard.current != null && Keyboard.current.tKey.wasPressedThisFrame)
-        {
-            if (Checkpoints.instance != null)
-            {
-                Checkpoints.instance.RespawnPlayer();
-            }
-        }
-
         if (isDashing)
         {
             return;
